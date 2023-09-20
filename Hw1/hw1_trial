@@ -1,0 +1,51 @@
+using LinearAlgebra
+
+function p1(x::Vector{Float64}, A::Matrix{Float64})
+    out = Vector{Float64}(undef, size(A,1))
+    Ax = A*x
+    for i in eachindex(x)
+        out[i] = exp.(Ax[i]) / sum(Ax[i])
+    end
+    return out
+end
+
+function l_ver1(dataset::Matrix{Float64}; A::Matrix{Float64}= A)
+    nc,N = size(dataset)
+    sum = 0 
+    for i = 1:N    
+        @show pci = p1(dataset[:,i],A)
+        sum += log(pci[c[i]])
+    end
+    return sum
+end    
+
+function l_ver2(dataset::Matrix{Float64}; C::Matrix{Float64}= C, A::Matrix{Float64} = A)
+    d,N = size(dataset)
+
+    #should do rowwise matrix
+    first_term = log(ones(N,1)' * exp.(A*dataset))
+    second_term = tr(C'*A*dataset)
+    return first_term - 1/N*second_term
+end
+
+
+d = 4;
+N = 3; # number of samples
+k = 5
+dataset = rand(d,N)
+c = rand(1:k, N)
+C = Matrix{Float64}(undef, k, N)
+for i in eachindex(size(C,1))
+    for j in eachindex(size(C,2))
+        if i == c[j]
+            C[i,j] = 1
+        else
+            C[i,j] = 0
+        end
+    end
+end
+
+A = rand(k,d);
+
+l1 = l_ver1(dataset)
+l2 = l_ver2(dataset)
