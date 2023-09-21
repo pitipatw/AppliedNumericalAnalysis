@@ -1,0 +1,277 @@
+% \documentclass{article}
+\documentclass{scrartcl}
+
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amstext}
+\usepackage{amsthm}
+\usepackage{hyperref}
+
+
+\begin{document}
+
+\title{Homework 1}
+\subtitle{6.s955 Applied Numerical Analysis}
+\author{Pitipat Wongsittikan }
+\date{September $21^{st}$, 2023}
+\maketitle
+
+
+\section*{Problem 1}
+\paragraph{a.} 
+Cases for $\mathbf{overflow}$ could happen when any values that appear in your calculation exceed the maximum value of the selected datatype. For this particular function $f(\mathbf{x})$, which contain exponential terms, could be the case where $x_{i} = e^{(something}$ $^{big})$ which makes $x_{i}$ becomes something even bigger, hence, $x_{i}$ itself, or their $\sum$ prone to exceed the maximum value of the datatype or the $\sum$ of a lot of large numbers $x_{i}$ which leads to the summation results exceeding the limit. 
+
+Cases for $\mathbf{underflow}$ could also happen when one or many of the $x_{i}$s are large negative numbers, this would led to $e^{x_i}$ to become very small or $x_{i}$ has large difference in the magnitude, $(1\mathrm{e}{-12})+(1\mathrm{e}{20})$, which would result in loss of precision when adding them together. The point here may be similar to the underflow case for the summation problem that got solved with Kahan-summation (refers to the lecture or Professor Justin Solomon's book). 
+
+\paragraph{b.}
+For $a \in \mathbb{R}$, show $f(\boldsymbol{x}) = a + \log \sum_{i=1}^{n} e^{x_i-a}$.\\
+We start with multiplying $\frac{e^{a}}{e^{a}}$ to each term inside the $\sum$
+\begin{align}
+f(\boldsymbol{x}) 
+&= \log \sum_{i=1}^{n} e^{x_i}\\
+&= \log \sum_{i=1}^{n} (e^{x_i} \frac{e^{a}}{e^{a}})\\
+&= \log \sum_{i=1}^{n} \frac{e^{x_i}}{e^{a}} e^{a}\\
+&= \log {e^{a}}\sum_{i=1}^{n} \frac{e^{x_i}}{e^{a}}
+\end{align}
+\\\\\\
+We know that $\forall A,B\in \mathbb{R}$, $ e^{A}/e^{B} = e^{A-B}$, the term becomes,
+
+\begin{align}
+f(\boldsymbol{x}) 
+&= \log {e^{a}}\sum_{i=1}^{n} (e^{x_i-a})
+\end{align}
+
+Now, we apply $\log(A*B) = \log(A) + \log(B)$. We will get,
+
+\begin{align}
+f(\boldsymbol{x}) 
+&=\log(e^{a}) + \log(\sum_{i=1}^{n} (e^{x_i-a})\\
+&= a + \log\sum_{i=1}^{n} e^{x_i-a}
+\end{align}
+
+Now, if we take $a = \max_ix_i$, refer to equation (4), this basically means we are dividing each term with $e^{\max_ix_i}$ which normalize $x_i$ to the upper bound value of 1, which makes the function less likely to deal with large numbers, hence, avoids the issue with overflow.
+
+\paragraph{c.}
+Given $\mathbf{g} = \nabla f(\mathbf{x}) = \{ g_j : g_j = \frac{\partial f(\mathbf{x})}{\partial x_j}\}$
+\begin{align}
+g_j
+&= \frac{ \partial}{\partial x_j} \log \sum_{i=1}^{n} e^{x_i}\\
+&= \frac{\log e^{x_j}}{ \sum_{i=1}^{n} e^{x_i}} 
+\end{align}
+Now, we use $a = e^{\log{a}}$. We will get,
+\begin{align}
+g_j
+&= e^{ \log(\frac{\log e^{x_j}}{ \sum_{i=1}^{n} e^{x_i}} )}\\
+&= e^{ \log e^{x_j} - \log({ \sum_{i=1}^{n} e^{x_i}} )}\\
+&= e^{ x_j - \log({ \sum_{i=1}^{n} e^{x_i}} )}\\
+&= \exp(x_j - \log{ \sum_{i=1}^{n} e^{x_i}} )
+\end{align}
+
+\paragraph{d.}
+
+For the left-hand-side, take a look at $\frac{1}{t}f(t\mathbf{x})$ in the form of $ 1/t\max_itx_i +\\ 1/t\log\sum_{i=1}^{n} e^{tx_i-\max_itx_i}$. Since the exponential terms are normalized by $\max_itx_i$, it can be guaranteed that the value of the $\sum$ term is $>= e^{1}$, therefore, $\log \sum$term will be greater than or equal to 0, meaning  $ 1/t\max_itx_i + 1/t\log\sum_{i=1}^{n} e^{tx_i-\max_itx_i}$ will be greater than or equal to 1/t$max_itx_i= \max_ix_i$. 
+
+\begin{align}
+\max_{i}x_i \leq \max_ix_i + 1/t\log\sum_{i=1}^{n} e^{tx_i-\max_itx_i} = \frac{1}{t}f(t\mathbf{x})
+\end{align}
+
+For the right-hand-side, take a look at the case where $x_i$ are all equal. This leads to $x_i = \max_ixi$ for all $i \in [1,N]$ which is the largest value that $f$ could have. $\frac{1}{t} f(t{bold{x}})$ becomes, 
+
+\begin{align}
+\frac{1}{t} f(t{bold{x}})
+&=1/t\max_itx_i + 1/t\log\sum_{i=1}^{n} e^{\max_itx_i-\max_itx_i}\\
+&=1/t\max_itx_i + 1/t\log\sum_{i=1}^{n} e^{0}\\
+&=1/t\max_itx_i + 1/t\log\sum_{i=1}^{n} (1)\\
+&=\max_ix_i + 1/t\log n\\
+\end{align}
+
+This mean, 
+\begin{align}
+\frac{1}{t}f(t\mathbf{x}) \leq \max_ix_i + 1/t\log N
+\end{align}
+
+Combining (14) and (20) we will get, 
+
+\begin{align}
+\max_{i}x_i \leq \frac{1}{t}f(t\mathbf{x})  \leq \max_ix_i + 1/t\log N
+\end{align}
+
+To utilize $f$ as a differentiable approximation to map $\mathbf{x}$ to $\max_ix_i$, we can take a $t$ to be a large number compared to $\log n$, for example $1\mathrm{e}{6}$, this would squeeze the $1/tf(t\mathbf{x}$ in (21) to be in the narrow range between $\max_ix_i$ and $\max_ix_i + 1/t\log n $and which is also differentiable.
+
+\section*{Problem 2}
+\paragraph{a.}
+Introduce a new variable $y$, where $y = \frac{||\Delta x||}{\epsilon||\mathbf{x}||}$ \\
+Note that now we can rewrite $\epsilon = \frac{||\Delta x||}{y||\mathbf{x}||}$\\
+The cond$_\infty (f,\mathbf{x})$ becomes 
+
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x}) 
+&= \lim\limits_{\epsilon \rightarrow 0}\sup_{y \leq 1} \frac{|f(\mathbf{x}+ \Delta x) - f(x)|}{\frac{||\Delta x||}{y||\mathbf{x}||}(|f(x)|}\\
+&=\lim\limits_{\epsilon \rightarrow 0}\sup_{y \leq 1} \frac{(y||\mathbf{x})|| |f(\mathbf{x}+ \Delta x) - f(x)|}{(||\Delta x||) |f(x)|}
+\end{align}
+\\ \\ \\ \\
+
+Now we rearrange the numerator term by using Taylor's expansion around $x$ on the term $f(x+\triangle x)$.
+\begin{align}
+f((\mathbf{x}+\Delta \mathbf{x}) \approx f(\mathbf{x}) + \Delta \mathbf{x} \cdot \nabla f(\mathbf{x})
+\end{align}
+
+Equation (23) then becomes, 
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x}) 
+&=\lim\limits_{\epsilon \rightarrow 0}\sup_{y \leq 1} \frac{(y||\mathbf{x}||) |\Delta x \cdot \nabla f(x)|}{(||\Delta x||) |f(x)|}\\
+\end{align}
+
+For the sup term, we can clearly see that, to maximize the term, we have to do several things.\\
+\begin{enumerate}
+
+\item Maximize $y$, which occurs at $y = 1$,. This also implies 
+\begin{align}
+||\Delta x|| &= \epsilon||\mathbf{x}||\\
+\frac{||\Delta x||}{||\mathbf{x}||} &= \epsilon
+\end{align}
+
+\item Select $\Delta x$ such that its dot product with $\nabla f$ is maximum. Since every term of $\nabla f$ is positive, $\Delta x$ should take the form of a positive uniform vector. Therefore, $\Delta x$ could be written as $\max_k|x_k|\mathbf{1}$ or $||\Delta x||\mathbf{1}$.
+\end{enumerate}
+
+The problem now becomes, 
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x}) 
+&=\lim\limits_{\epsilon \rightarrow 0}\frac{|\Delta x \cdot \nabla f(x)|}{ \epsilon |f(x)|}\\
+&=\lim\limits_{\epsilon \rightarrow 0}\frac{|||\Delta x||\mathbf{1} \cdot \nabla f(x)|}{ \epsilon |f(x)|}\\
+\end{align}
+
+From the equation (28), we get, 
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x}) 
+&=\lim\limits_{\epsilon \rightarrow 0}\frac{|\epsilon ||\mathbf{x}||\mathbf{1} \cdot \nabla f(x)|}{ \epsilon |f(x)|}
+\end{align}
+
+
+From the definition, $||x|| = \max_k|x_k|$ this means the terms $||\Delta x||$ and $||x||$ are positive. 
+Since $||\Delta x|| \leq \epsilon ||x||$, therefore, $\epsilon$ must also be positive. 
+This implies that $\epsilon$ and $||\mathbf{x}||$ could be taken out of the $|.|$ without changing its sign and can be canceled out with $\epsilon $ in the denominator. Moreover, our condition number does not depends on $\epsilon$ anymore, thus, we can get rid of the $\lim$. 
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x}) 
+&=\lim\limits_{\epsilon \rightarrow 0} \frac{\epsilon||\mathbf{x}|| |\mathbf{1} \cdot \nabla f(x)|}{ \epsilon|f(x)|}\\
+&=\frac{|||\mathbf{x}|| |\mathbf{1}\cdot \nabla f(x)|}{|f(x)|}
+\end{align}
+
+From the problem definition, $||x|| = \max_k|x_k|$, the problem becomes, 
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x}) 
+&=\frac{ \max_k|x_k| |\mathbf{1}\cdot \nabla f(x)|}{|f(x)|}
+\end{align}
+
+Consider the term $\mathbf{1}\cdot \nabla f(x)$.
+We know that 
+\begin{align}
+\nabla f(\mathbf{x})_j 
+&= g_j\\
+&=\exp(x_j - \log{ \sum_{i=1}^{n} e^{x_i}} )\\
+&= \frac{e^{x_j}}{\sum_{i=1}^{n} e^{x_i}}
+\end{align}
+
+Therefore, $\mathbf{1}\cdot \nabla f(x)$ can be written as
+
+\begin{align}
+\mathbf{1}\cdot \nabla f(x)
+&= \sum_{j=1}^{n}{\frac{e^{x_j}}{\sum_{i=1}^{n} e^{x_i}}}\\
+&= \frac{\sum_{j=1}^{n}{e^{x_j}}}{\sum_{i=1}^{n} e^{x_i}}\\
+&= 1
+\end{align}
+
+Substituting $f(\mathbf{x}) = \log \sum_{i=1}^{n} e^{x_i}$,
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x}) 
+&=\frac{ \max_k|x_k| (1)}{|\log \sum_{i=1}^{n} e^{x_i}|}\\
+&=\frac{ \max_k|x_k| }{|\log \sum_{i=1}^{n} e^{x_i}|}
+\end{align}
+
+\paragraph{b.}
+From the equation (42), we substitute $x_i \approx - \log n$ for all $i$. We will get
+
+\begin{align}
+\textrm{cond}_\infty (f,\mathbf{x})
+&= \frac{\log n}{\log \sum_{i=1}^{n} e^{-\log n}}\\
+&= \frac{\log n}{\log \sum_{i=1}^{n} frac{1}{n}}\\
+&= \frac{\log n}{\log 1}\\
+&= \infty
+\end{align}
+Since the condition number is very large, we can conclude that log-sum-exp is ill-conditioned when $x_i \approx - \log n$ for all $i$.
+
+\paragraph{c.}
+Recall from problem 1 that $\log\sum_{i=1}^{n} e^{x_i} >= \max_ix_i$.
+If $\max_ix_i = \max_i|x_i|$ then, $\log\sum_{i=1}^{n} e^{x_i} >= \max_i|x_i|$.
+Since $max_i|x_i|$ is positive,  $|\log\sum_{i=1}^{n} e^{x_i}| >= \max_i|x_i|$ will also true. Rearrange the terms, we will have,
+
+\begin{align}
+ \frac{\max_i|x_i|}{|\log\sum_{i=1}^{n} e^{x_i}|} &=\textrm{cond}_\infty (f,\mathbf{x})\\
+ &\leq 1 
+\end{align}
+
+
+Since the condition number is small (less than 1), we can conclude that log-sum-exp is well-conditioned when $\max_ix_i = \max_i|x_i|$.
+
+\section*{Problem 3}
+\paragraph{a} From the definition $l(A) = -\frac{1}{N}\sum_{i=1}^{N}\log p_{c_{i}}(\mathbf{x}_i;A)$ and $p_{c_{i}}(\mathbf{x}_i;A) = \frac{e^{A\mathbf{x}}\textrm{(at} c_{i}\textrm{)}}{\mathbf{1}^{T}e^{A\mathbf{x}}}$ We can rewrite $l(A)$ as
+
+\begin{align}
+l(A)
+&=-\frac{1}{N}\sum_{i=1}^{N}\log\frac{e^{A\mathbf{x_i}} \textrm{(at }c_{i}\textrm{)}}{\mathbf{1}^{T}e^{A\mathbf{x_i}}}\\
+&=-\frac{1}{N}\sum_{i=1}^{N} [A\mathbf{x_i} \textrm{(at }c_{i}\textrm{) } - \log(\mathbf{1}^Te^{A\mathbf{x_i}})]
+\end{align}
+
+Since $p_{c_{i}}(\mathbf{x}_i;A)$ is an element at row $c_{i}$ column $i$ of $\mathbf{p}(\mathbf{X};A)$, the likelihood that the point $x_i$ belongs to the correct class $c_i$ can be found by multiplying row vector of size 1 by $k$ with 1 at the column where the actual class positioned at. 
+Since matrix $C$ is a matrix that has value of 1 at the row where that point $x_i$ belongs to. Multiplying $C^{T}AX$ would give an $N$x$N$ matrix where the sum of its diagonal (trace) (the product of row i column i) is the sum of the loss that the point $x_i$ is the actual class $c_i$. 
+\begin{align}
+l(A)
+&=-\frac{1}{N}\textrm{tr}(C^{T}AX) + \frac{1}{N} \sum_{i=1}^{N}\log(\mathbf{1}^Te^{A\mathbf{x_i}})
+\end{align}
+\newpage
+The second term is basically a sum of each element in $\log(\mathbf{1}^Te^{A\mathbf{X}})$, which is $\log(\mathbf{1}^Te^{A\mathbf{X}})\mathbf{1}$
+Therefore, $l(A)$ can be put in the form of
+\begin{align}
+l(A)
+&=-\frac{1}{N}\textrm{tr}(C^{T}AX) + \frac{1}{N} \log(\mathbf{1}^Te^{AX})\mathbf{1}\\
+&=\frac{1}{N} \log(\mathbf{1}^Te^{AX})\mathbf{1} -\frac{1}{N}\textrm{tr}(C^{T}AX)
+\end{align}
+
+The gradient of $l(A)$ respect to $A$ was calculated using
+\href{https://www.matrixcalculus.org/}{matrixcalculus.org} and was implemented in the hw1.py that was attached with this homework submission.
+The gradient result is
+\begin{align}
+\frac{\partial l(A)}{\partial A}  = \frac{1}{N}\exp(A\cdot X)\cdot \mathrm{diag}(\mathrm{vector}(1)^\top\oslash (\mathrm{vector}(1)^\top \cdot \exp(A\cdot X)))\cdot X^\top  - \frac{1}{N}C\cdot X^\top 
+\end{align}
+
+\paragraph{b}
+Given the current stage of the hw1.py which directly implement the result from part a, the function is still stable for the given value of A (tested by randomly create A many times and see if there's overflow or error happening, which did not occur).
+
+However, to make thing safe, we can make sure our $negative-log-likelihood-loss$ function stable for large value of $AX$ by implementing normalization as already did in Problem 1 ("did not" implement in the submitted version of hw1.py).
+
+
+
+\section*{Problem 4}
+In this problem, we implement a function to find the determinant of a given $N$ by $N$ matrix by doing partial pivoting in each row iteration to make sure that the value of the element along the diagonal is not too small, which would cause overflow when it divide other numbers.\\ 
+Since we know that the determinant of an upper triangular matrix is the product of its diagonal elements, we use forward substitution, with only scaling a row and add it to another row, technique to turn the given matrix into an upper triangular matrix. Then the determinant was calculated by multiplying the element along the diagonal of the matrix.
+
+From the current test with random $N$ by $N$ matrix and with numpy's numpy.linalg.det(a), we found that the current function is stable to the numerical precision and correct.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

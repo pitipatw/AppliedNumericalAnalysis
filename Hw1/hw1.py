@@ -39,7 +39,6 @@ def negative_log_likelihood_loss(A,X,C):
     k,d = np.shape(A)
     N = np.shape(X)[1]
 
-
     # print(k)
     # print(d)
     # print(N)
@@ -62,13 +61,9 @@ def negative_log_likelihood_loss(A,X,C):
     # print(np.shape(loss2))
     loss = loss1 + loss2 
 
-
-
-
     T0 = np.exp(np.matmul(A,X))
     # print("shape of T0 ")
     # print(np.shape(T0)) #k x N
-
 
     # print((np.ones((1,N))/(np.ones((1,k)).dot(T0)))[0])
     # print(np.shape(np.diag((np.ones((1,N))/(np.ones((1,k)).dot(T0)))[0])))
@@ -106,3 +101,63 @@ for i in range(100):
 
     A = A - learningRate*grad
 # print('loss',i,'=',loss,', test loss',i,'=',loss_test)
+
+print("End of problem 3")
+
+def my_det(Ainput):
+    A = Ainput.copy()
+    # print("This is A")
+    # print(A)
+    N = np.shape(A)[1]
+    
+    #check for upper or lower triangular, so that the determinant can be found using just scaling and back-sub
+    upper_tri = False
+    sign = 1 #every time there is column swap, multiply by -1
+
+    #check if the first member of the pivoting is the larger among other elements in the same row
+    # to prevent machine error scaling thingy.
+
+    #First, tidy up the matrix, make sure that the big values stays at the diagonal.
+    for i in range(N): 
+
+        #find the maximum values in that row. 
+        idx = np.argmax(np.abs(A[i,:]))
+        # print("Large col at ", idx)
+        temp = A[:,idx].copy()
+        A[:,idx] = A[:,i].copy()
+        A[:,i] = temp
+ 
+        if idx != i : 
+            # print("swap sign")
+            sign *= -1 
+
+        val = A[i,i]
+        # print(val)
+        # A[i,:] = A[i,:]/val
+        # print(A[i,:])
+        # loop rows below row i
+        for j in range(i+1,N):
+            scale = A[j,i].copy()/val
+            # print(scale)
+            # print(scale*A[i,:])
+            # print(A[j,:] - scale*A[i,:])
+            temp = A[j,:] - scale*A[i,:]
+            A[j,:] = temp
+            # print(A)
+            # print("mod A \n", A)
+    return sign*A.diagonal().prod()
+
+#tester
+N = 100
+for i in range(N):
+    d = np.random.randint(1,100)
+    A = np.random.normal(size=(d,d))
+    A_test = np.linalg.det(A)
+    A_mine = my_det(A)
+    # print(A_test)
+    # print(A_mine)
+    error = np.abs(A_test - A_mine)/A_test
+    if  error > 0.001:
+        print("Fail at d = ",d)
+        print("error = ",error)
+
