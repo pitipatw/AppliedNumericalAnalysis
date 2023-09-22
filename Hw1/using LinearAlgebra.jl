@@ -1,11 +1,41 @@
 using LinearAlgebra
-N = 4
-d = 5
-X = rand(d,N)
+k = 4
+d = 3
+N = 10
 
-a = rand(d)
-α = rand(1)[1]
+c = rand(1:k,N)
+A = rand(1:5,k,d)
+X = rand(1:5,d,N)
 
-out1 = X*X'*a + α*a # α is a scalar
-out2 = (X*X' + α*I)*a # α is a scalar
+C = zeros(k,N)
+for i in axes(C,1)
+    for j in axes(C,2)
+        if i == c[j]
+            C[i,j] = 1
+        end
 
+    end
+end
+println("#####")
+println(c)
+println("&&&&")
+for i in axes(C,1)
+    println(C[i,:])
+end
+
+println("&&&&")
+AX = A*X
+for i in axes(AX,1)
+    println(AX[i,:])
+end
+
+println("&&&&")
+for i in axes(C,1)
+    println(C[i,:])
+end
+
+println("&&&&")
+CtAX = C'*A*X
+for i in axes(CtAX,1)
+    println(CtAX[i,:])
+end
