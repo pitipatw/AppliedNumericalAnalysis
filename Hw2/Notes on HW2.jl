@@ -1,12 +1,22 @@
 println("""
 1a. A projection matrix to the null space.
-    Null space of AT is the solution vectors x where Ax = 0.
+    Null space of AT is the solution vectors x where A^{T}x = 0.
     Maybe 
 
-    Ax = 0,
-    Project matrix onto vector
+    An arbitrary vector v (m by 1)
+    if x is null space of a
+    P0v = cx
 
-    A new matrix, B
+    multiply by A{T}
+    A^{T}P0v = cA^{T}x = 0 
+    A^{T}P0v = 0 
+    
+    I know that for matrix, ABC = 0 does not imply A =0 or B= 0 or C = 0,
+        but it's very temping to substitute QQT = I ,and let the P0 term become 0, is this just a special case, or something? 
+
+        I know that A = QR is unique, therefore, P0 always = 0 ?
+        So
+
     ( Null space AT)
     PB = cx
     ATPB = cATx 
@@ -23,6 +33,7 @@ println("""
 
 
 1b. Review Cholesky Fac.
+        gram smidth algorithm.
 
 1c. What is the power iteration? 
     What is the domain eigenvalue of A = uvT.
