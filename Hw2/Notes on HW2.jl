@@ -32,8 +32,34 @@ println("""
 
 
 
-1b. Review Cholesky Fac.
-        gram smidth algorithm.
+1b. Gram Matrix : A^{T}A is a symmetry matrix. 
+        A is R^{m x n}
+    Cholesky Factorization of A^{T}A is LL^{T}
+    Where L is a "L"ower triangular matrix dimension n x n.
+
+    If we want a QR factorization of A, i.e., A = QR, we also know that in this case Q^{T}Q = I 
+        Q is dimension m by n, R is n by n (Same as L) 
+    From A = QR
+        A^{T}A = A^{T}QR
+               = (QR)^{T}QR
+               = R^T(Q^TQ)R
+               = R^TR 
+        Compare this with LL^T 
+    We can see that R^T is L. 
+    Therefore, if we find the Cholesky Factorization of A^TA, which is LL^T,
+    We will automatically get R for the QR factorization, 
+    From A = QR
+    We can calcualte Q = R^{-1}A ??? (This is bad, since we have to calculate the inverse of R)
+
+
+Another way around, 
+        If we know that A = LL^{T}, 
+        A^{T} = L^TL 
+        If columns are orthogonal, when their dot product (inner product) is 0, 
+        which means, (AL^{-1} multiply by its transpose is ??0??)
+
+        
+
 
 1c. What is the power iteration? 
     What is the domain eigenvalue of A = uvT.
