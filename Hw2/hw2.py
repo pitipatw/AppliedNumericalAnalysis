@@ -12,7 +12,7 @@ ps.set_use_prefs_file(False)
 ps.init() # only call once
 
 # Load triangle mesh
-vertices, faces = gpy.read_mesh("Hw2/armadillo.obj")
+vertices, faces = gpy.read_mesh("armadillo.obj")
 ps_mesh0 = ps.register_surface_mesh("Rest mesh", vertices, faces, transparency=0.1) # display mesh
 ps_mesh = ps.register_surface_mesh("Deformed mesh", vertices, faces) # display mesh
 nv = vertices.shape[0] # number of vertices
@@ -28,7 +28,11 @@ col = np.concatenate((faces[:,1],faces[:,2],faces[:,0]))
 A3 = np.concatenate((A,A,A))
 W = sp.sparse.csr_matrix((A3, (row,col)),shape=(nv,nv))
 W = W + W.T
-
+# print("W")
+# print(W)
+# print("---")
+# print(W[(0,3)])
+# print("END W")
 # Homework problem 3c:
 #    Input:
 #        restPositions     --- nv x 3 matrix of vertex positions before deformation (p)
@@ -38,8 +42,25 @@ W = W + W.T
 #    Hint:  check out numpy.linalg.svd(...)
 def findARAPRotations(restPositions,deformedPositions):
     R = np.zeros((nv,3,3))
-
+    
     ##### ANSWER GOES HERE #####
+    for i in range(nv):
+        pi = restPositions[i,:]
+        pi_prime = deformedPositions[i,:]
+        eij = pi - restPositions
+        eij_prime = pi_prime - deformedPositions
+
+        Pi = eij
+        Pi_prime = eij_prime
+        #construct Di
+        Di = np.zeros((nv,nv))
+        for j in range(nv): 
+            Di[j,j] = W[(i,j)]
+
+        Si = Pi*Di*Pi_prime
+# perform singular value decomposition Si = UiViT
+        U,S,Vh =  np.linalg.svd(Si)
+        R[i,:,:] = U*Vh.T
     
     ##### END ANSWER #####
 
@@ -52,6 +73,14 @@ def findARAPRotations(restPositions,deformedPositions):
 #    Hint:  check out scipy.sparse.diags(...)
 def ARAPMatrix():
     ##### ANSWER GOES HERE #####
+
+    #Get the right hand side
+    R = findARAPRotations(restPositions,deformedPositions)
+    B = ARAPRHS(restPositions,R,handlePositions)
+
+    #Do the left hand side.
+
+    A = 
     return sp.sparse.eye(nv) # replace this code!
     ##### END ANSWER #####
 
@@ -62,9 +91,16 @@ def ARAPMatrix():
 #        B --- nv x 3 sparse matrix so that A^{-1}B (together with ARAPMatrix above) solves the ARAP global problem
 def ARAPRHS(restPositions,R,handlePositions):
     B = np.zeros((nv,3))
-    
     ##### ANSWER GOES HERE #####
-    
+    for i in range(nv):
+        if i in handlePositions:
+            B[i,:] = restPositions[handlePositions,:]
+        else:
+            Bi = np.zeros((1,3)) 
+            for j in range(nv):
+                Bi += W[(i,j)]/2*(R[i,:,:] + R[j,:,:])*(restPositions[i,:],restPositions[j,:])
+                #will have to find on l
+            B[i,:] = Bi
     ##### END ANSWER #####
     
     return B
@@ -73,14 +109,21 @@ def solveARAP(handlePositions):
     deformedPositions = vertices
     
     ##### ANSWER GOES HERE: PRECOMPUTATION #####
-    
+    L = np.zeros((nv,nv))
+    Warray = W.toarray()
+    for i in range(nv):
+        for j in range(nv): 
+            if i == j : 
+                L[i,j] = np.sum(Warray[i,:])
+            else: 
+                L[i,j] = -W[i,j]
     ##### END ANSWER: PRECOMPUTATION #####
     
     for i in range(10): # one ARAP iteration
         print("ARAP iteration",i)
         
         ##### ANSWER GOES HERE: ARAP ITERATION #####
-        
+        #remove rows and columns respected to handles.
         ##### END ANSWER: ARAP ITERATION #####
     
     return deformedPositions
