@@ -123,7 +123,7 @@ def solveARAP(handlePositions):
         print("ARAP iteration",i)
         
         ##### ANSWER GOES HERE: ARAP ITERATION #####
-        
+        #remove rows and columns respected to handles.
         ##### END ANSWER: ARAP ITERATION #####
     
     return deformedPositions
