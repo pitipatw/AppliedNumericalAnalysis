@@ -1,0 +1,72 @@
+using Makie, GLMakie
+using DataFrames
+
+nt = 4 #number of tasks
+maxtime = 100
+
+id = 1:nt
+l  = rand(1:10, nt) 
+r = rand(1:49, nt)
+d = r .+ l .+ rand(0:20, nt)
+e = d-r-l
+
+problems = DataFrame(:id=>id, :r=>r, :l=>l, :d=>d, :f=>e)
+
+#visualizing the problems
+figure1 = Figure(resolution = (800, 600))
+ax1 = Axis(figure1[1, 1], xlabel = "Time", ylabel = "Task IDs", xlabelsize= 48, ylabelsize = 48)
+xs = problems[!,:r] #release dates
+ys = problems[!,:id] #id
+ds = problems[!,:d] #due dates
+for i in 1:nt
+    lines!(ax1, [xs[i], xs[i]+problems[i,:l]], [ys[i], ys[i]], color = :red, linewidth = 20)
+    scatter!(ax1, ds[i], ys[i], color = :blue, linewidth = 10)
+end
+
+
+
+problems[!,:active] .= true
+work = Vector{Float64}(undef, maxtime)
+problems = problems #just for now.
+println("should take at least time = $(sum(problems[!,:l]))")
+for t in 1:maxtime
+
+    # problems[problems[!,:r].>=t, :active] .= true
+    # problems = problems[problems[!,:active],:]
+
+    #update slack times
+    problems[!,:s] = problems[!,:d] .-t .- problems[!,:l]
+    selected_problem = sort(problems, [:s])[1,:id] #in terms of the id
+
+    #work on that problems
+    work[t] = selected_problem
+    #update tasks
+    problems[problems[!,:id].== selected_problem, :l] = problems[problems[!,:id].== selected_problem, :l] .- 1
+    # @show typeof(problems[problems[!,:id].== selected_problem
+    # println(problems[problems[!,:id].== selected_problem, :l])
+    if problems[problems[!,:id].== selected_problem, :l][1] < 0
+        problems[problems[!,:id].== selected_problem, :active] .= false
+    end
+    
+
+
+    # println(problems[!,[:id, :l, :s, :active]])
+
+    if sum(problems[!,:active]) == 0
+        println("done at time $t.")
+        break
+    end
+end
+
+println("DONE")
+
+#visualizeing the work timeline
+xs = 1:maxtime#release dates
+ys = work .+0.3 #id, but shifted
+for i in 1:maxtime
+    lines!(ax1, [xs[i], xs[i]+ 1], [ys[i], ys[i]], color = :green, linewidth = 20)
+    # scatter!(ax1, ds[i], ys[i], color = :blue, linewidth = 10)
+end
+
+
+
