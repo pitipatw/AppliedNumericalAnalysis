@@ -73,6 +73,14 @@ def findARAPRotations(restPositions,deformedPositions):
 #    Hint:  check out scipy.sparse.diags(...)
 def ARAPMatrix():
     ##### ANSWER GOES HERE #####
+
+    #Get the right hand side
+    R = findARAPRotations(restPositions,deformedPositions)
+    B = ARAPRHS(restPositions,R,handlePositions)
+
+    #Do the left hand side.
+
+    A = 
     return sp.sparse.eye(nv) # replace this code!
     ##### END ANSWER #####
 
@@ -83,9 +91,16 @@ def ARAPMatrix():
 #        B --- nv x 3 sparse matrix so that A^{-1}B (together with ARAPMatrix above) solves the ARAP global problem
 def ARAPRHS(restPositions,R,handlePositions):
     B = np.zeros((nv,3))
-    
     ##### ANSWER GOES HERE #####
-    
+    for i in range(nv):
+        if i in handlePositions:
+            B[i,:] = restPositions[handlePositions,:]
+        else:
+            Bi = np.zeros((1,3)) 
+            for j in range(nv):
+                Bi += W[(i,j)]/2*(R[i,:,:] + R[j,:,:])*(restPositions[i,:],restPositions[j,:])
+                #will have to find on l
+            B[i,:] = Bi
     ##### END ANSWER #####
     
     return B
@@ -94,7 +109,14 @@ def solveARAP(handlePositions):
     deformedPositions = vertices
     
     ##### ANSWER GOES HERE: PRECOMPUTATION #####
-    
+    L = np.zeros((nv,nv))
+    Warray = W.toarray()
+    for i in range(nv):
+        for j in range(nv): 
+            if i == j : 
+                L[i,j] = np.sum(Warray[i,:])
+            else: 
+                L[i,j] = -W[i,j]
     ##### END ANSWER: PRECOMPUTATION #####
     
     for i in range(10): # one ARAP iteration
