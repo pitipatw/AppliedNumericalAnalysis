@@ -68,7 +68,7 @@ def main():
     # spiral_data = spiral_data[:5]
 
     # Construct the k-nearest neighbors graph of the data
-    k = 100
+    k = 10
 
     A = knn_graph(spiral_data , k)
 
@@ -130,6 +130,8 @@ def main():
         cmap=plt.cm.Reds_r
     )
     plt.savefig(str(k))
+    print(np.max(x_opt))
+    print(np.min(x_opt))
     plt.show()
 if __name__ == "__main__":
     main()
